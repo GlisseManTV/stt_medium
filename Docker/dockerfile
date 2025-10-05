@@ -7,7 +7,7 @@ WORKDIR /app
 # Copier le fichier requirements.txt
 COPY requirements.txt .
 
-# Installer les dépendances (sauf PyTorch + TorchVision + TorchAudio)
+# Installer les dÃ©pendances (sauf PyTorch + TorchVision + TorchAudio)
 RUN python -m venv /app/venv && \
     /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
