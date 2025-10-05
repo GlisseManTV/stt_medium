@@ -1,22 +1,35 @@
-FROM nvidia/cuda:12.1-runtime-ubuntu22.04
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+# Variables d'environnement
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/app/venv/bin:$PATH"
 
 WORKDIR /app
 
-# Copier le fichier requirements.txt
+# Installer Python, pip et dépendances de build
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3 python3-venv python3-pip python3-dev build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copier requirements
 COPY requirements.txt .
 
-# Créer un environnement virtuel et installer les dépendances
-RUN python -m venv /app/venv && \
-    /app/venv/bin/pip install --no-cache-dir -r requirements.txt
+# Créer l'environnement virtuel et installer requirements
+RUN python3 -m venv /app/venv && \
+    pip install --no-cache-dir -U pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
 
+# Installer PyTorch compatible CUDA 12.1
+RUN pip install --no-cache-dir torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 \
+    --index-url https://download.pytorch.org/whl/cu121
 
-RUN /app/venv/bin/pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
-
-# Copier le code source
+# Copier ton code
 COPY . .
 
-# Exposer le port
+# Exposer le port de l'API
 EXPOSE 9200
 
-# Activer le venv et lancer l'application
-CMD ["/app/venv/bin/uvicorn", "medium.py:app", "--host", "0.0.0.0", "--port", "9200"]
+# Commande de démarrage
+CMD ["uvicorn", "medium:app", "--host", "0.0.0.0", "--port", "9200"]
+
