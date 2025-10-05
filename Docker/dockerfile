@@ -1,3 +1,5 @@
+FROM nvidia/cuda:12.1-runtime-ubuntu22.04
+
 WORKDIR /app
 
 # Copier le fichier requirements.txt
