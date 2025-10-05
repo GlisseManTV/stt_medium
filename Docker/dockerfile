@@ -31,5 +31,5 @@ COPY . .
 EXPOSE 9200
 
 # Commande de démarrage
-CMD ["uvicorn", "medium:app", "--host", "0.0.0.0", "--port", "9200"]
+CMD ["uvicorn", "STT_output:app", "--host", "0.0.0.0", "--port", "9200"]
 
