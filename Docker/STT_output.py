@@ -1,4 +1,4 @@
-from faster_whisper import WhisperModel, available_models, download_model
+from faster_whisper import WhisperModel, available_models, BatchedInferencePipeline, download_model
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
 from tqdm import tqdm
@@ -15,7 +15,7 @@ MODEL_SIZE_ENV = os.getenv("MODEL_SIZE", "medium")
 DEVICE_ENV = os.getenv("DEVICE", "cuda")
 COMPUTE_TYPE_ENV = os.getenv("COMPUTE_TYPE", "float16")
 OUTPUT_DIR_ENV = os.getenv("OUTPUT_DIR", "/rootPath/STT_Output")
-BATCH_SIZE_ENV = int(os.getenv("BATCH_SIZE", None))
+BATCH_SIZE_ENV = os.getenv("BATCH_SIZE", None)
 
 
 def test_available_models():
@@ -32,10 +32,11 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
         f.write(await file.read())
 
     try:
+        BATCH_SIZE_ENV = os.getenv("BATCH_SIZE", None)
         batch_size_val = int(BATCH_SIZE_ENV) if BATCH_SIZE_ENV is not None else None
 
         if batch_size_val is not None:
-            from faster_whisper import WhisperModel, BatchedInferencePipeline
+
             batched_model = BatchedInferencePipeline(model=model)
             segments_gen, info = batched_model.transcribe(
                 filename,
