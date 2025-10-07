@@ -13,13 +13,16 @@ app = FastAPI()
 
 from faster_whisper import available_models, download_model
 
+MODEL_SIZE_ENV = os.getenv("MODEL_SIZE", "medium")
+DEVICE_ENV = os.getenv("DEVICE", "cuda")
+COMPUTE_TYPE_ENV = os.getenv("COMPUTE_TYPE", "float16")
 
 def test_available_models():
     models = available_models()
     assert isinstance(models, list)
     assert "tiny" in models
 
-model = WhisperModel("medium", device="cuda", compute_type="float16")
+model = WhisperModel(MODEL_SIZE_ENV, device=DEVICE_ENV, compute_type=COMPUTE_TYPE_ENV)
 
 @app.post("/audio/transcriptions")
 async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisper-1")):
@@ -35,10 +38,10 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
         processing_time = perf_counter() - start_time
         
         header = (
-            f"Modèle utilisé      : {model}\n"
-            f"Durée audio         : {info.duration:.2f} secondes\n"
-            f"Nombre de caractères: {len(text)}\n"
-            f"Temps de traitement : {processing_time:.2f} secondes\n"
+            f"Used model      : {model}\n"
+            f"Audio duration         : {info.duration:.2f} sec\n"
+            f"Nr of char: {len(text)}\n"
+            f"Treatment duration: {processing_time:.2f} sec\n"
             f"{'-'*40}\n\n"
 )
 
