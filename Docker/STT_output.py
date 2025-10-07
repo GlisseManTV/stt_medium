@@ -41,12 +41,16 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
             segments_gen, info = batched_model.transcribe(
                 filename,
                 beam_size=5,
-                batch_size=batch_size_val
+                batch_size=batch_size_val,
+                log_progress=True,
+                multilingual=True
             )
         else:
             segments_gen, info = model.transcribe(
                 filename,
-                beam_size=5
+                beam_size=5,
+                log_progress=True,
+                multilingual=True
             )
         segments = list(segments_gen)
         text = "".join([segment.text for segment in tqdm(segments, desc="Transcription", unit="segment", file=sys.stdout, ascii=True)])
@@ -58,7 +62,7 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
             f"Nr of char: {len(text)}\n"
             f"Treatment duration: {processing_time:.2f} sec\n"
             f"{'-'*40}\n\n"
-)
+        )
 
         output_dir = os.path.join(OUTPUT_DIR_ENV, "STT_output")
         os.makedirs(output_dir, exist_ok=True)
