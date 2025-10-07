@@ -16,6 +16,7 @@ from faster_whisper import available_models, download_model
 MODEL_SIZE_ENV = os.getenv("MODEL_SIZE", "medium")
 DEVICE_ENV = os.getenv("DEVICE", "cuda")
 COMPUTE_TYPE_ENV = os.getenv("COMPUTE_TYPE", "float16")
+OUTPUT_DIR_ENV = os.getenv("OUTPUT_DIR", "/rootPath/STT_Output")
 
 def test_available_models():
     models = available_models()
@@ -45,7 +46,7 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
             f"{'-'*40}\n\n"
 )
 
-        output_dir = os.path.join(os.path.dirname(__file__), "STT_output")
+        output_dir = os.path.join(OUTPUT_DIR_ENV, "STT_output")
         os.makedirs(output_dir, exist_ok=True)
 
         current_datetime = datetime.now().strftime("%y%m%d_%H%M")
