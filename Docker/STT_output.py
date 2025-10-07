@@ -7,9 +7,6 @@ import uvicorn
 import os
 import uuid
 import sys
-import torch
-print("CUDA :", torch.cuda.is_available())
-print("GPU :", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU")
 
 app = FastAPI()
 
