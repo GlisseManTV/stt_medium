@@ -1,4 +1,4 @@
-from faster_whisper import WhisperModel
+from faster_whisper import WhisperModel, available_models, download_model
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
 from tqdm import tqdm
@@ -11,12 +11,12 @@ import sys
 
 app = FastAPI()
 
-from faster_whisper import available_models, download_model
-
 MODEL_SIZE_ENV = os.getenv("MODEL_SIZE", "medium")
 DEVICE_ENV = os.getenv("DEVICE", "cuda")
 COMPUTE_TYPE_ENV = os.getenv("COMPUTE_TYPE", "float16")
 OUTPUT_DIR_ENV = os.getenv("OUTPUT_DIR", "/rootPath/STT_Output")
+BATCH_SIZE_ENV = int(os.getenv("BATCH_SIZE", None))
+
 
 def test_available_models():
     models = available_models()
@@ -32,11 +32,21 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
         f.write(await file.read())
 
     try:
-        start_time = perf_counter()
-        segments_gen, info = model.transcribe(
-            filename,
-            beam_size=5,
-        )
+        batch_size_val = int(BATCH_SIZE_ENV) if BATCH_SIZE_ENV is not None else None
+
+        if batch_size_val is not None:
+            from faster_whisper import WhisperModel, BatchedInferencePipeline
+            batched_model = BatchedInferencePipeline(model=model)
+            segments_gen, info = batched_model.transcribe(
+                filename,
+                beam_size=5,
+                batch_size=batch_size_val
+            )
+        else:
+            segments_gen, info = model.transcribe(
+                filename,
+                beam_size=5
+            )
         segments = list(segments_gen)
         text = "".join([segment.text for segment in tqdm(segments, desc="Transcription", unit="segment", file=sys.stdout, ascii=True)])
         processing_time = perf_counter() - start_time
