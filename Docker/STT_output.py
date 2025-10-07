@@ -15,8 +15,6 @@ MODEL_SIZE_ENV = os.getenv("MODEL_SIZE", "medium")
 DEVICE_ENV = os.getenv("DEVICE", "cuda")
 COMPUTE_TYPE_ENV = os.getenv("COMPUTE_TYPE", "float16")
 OUTPUT_DIR_ENV = os.getenv("OUTPUT_DIR", "/rootPath/STT_Output")
-BATCH_SIZE_ENV = os.getenv("BATCH_SIZE", None)
-
 
 def test_available_models():
     models = available_models()
