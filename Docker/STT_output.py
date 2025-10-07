@@ -1,4 +1,4 @@
-from faster_whisper import WhisperModel, available_models, BatchedInferencePipeline, download_model
+from faster_whisper import WhisperModel, available_models, download_model
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
 from tqdm import tqdm
@@ -32,26 +32,13 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
         f.write(await file.read())
 
     try:
-        BATCH_SIZE_ENV = os.getenv("BATCH_SIZE", None)
-        batch_size_val = int(BATCH_SIZE_ENV) if BATCH_SIZE_ENV is not None else None
-
-        if batch_size_val is not None:
-
-            batched_model = BatchedInferencePipeline(model=model)
-            segments_gen, info = batched_model.transcribe(
-                filename,
-                beam_size=5,
-                batch_size=batch_size_val,
-                log_progress=True,
-                multilingual=True
-            )
-        else:
-            segments_gen, info = model.transcribe(
-                filename,
-                beam_size=5,
-                log_progress=True,
-                multilingual=True
-            )
+        start_time = perf_counter()
+        segments_gen, info = model.transcribe(
+            filename,
+            beam_size=5,
+            log_progress=True,
+            multilingual=True
+        )
         segments = list(segments_gen)
         text = "".join([segment.text for segment in tqdm(segments, desc="Transcription", unit="segment", file=sys.stdout, ascii=True)])
         processing_time = perf_counter() - start_time
