@@ -1,7 +1,6 @@
 from faster_whisper import WhisperModel, BatchedInferencePipeline, available_models, download_model
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
-from tqdm import tqdm
 from datetime import datetime
 from time import perf_counter
 import uvicorn
@@ -9,8 +8,8 @@ import os
 import uuid
 import sys
 import torch
-print("CUDA disponible :", torch.cuda.is_available())
-print("GPU :", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "Aucun GPU")
+print("CUDA :", torch.cuda.is_available())
+print("GPU :", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU")
 
 app = FastAPI()
 
@@ -38,7 +37,7 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
         batch_size_val = int(BATCH_SIZE_ENV) if BATCH_SIZE_ENV is not None else None
 
         if batch_size_val is not None:
-            print("Batching:", batch_size_val)
+            print("Batch size:", batch_size_val)
             batched_model = BatchedInferencePipeline(model=model)
             segments_gen, info = batched_model.transcribe(
                 filename,
@@ -48,7 +47,7 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
                 multilingual=True                 
             )
         else:
-            print("Batching: Non")
+            print("Batching: No")
             segments_gen, info = model.transcribe(
                 filename,
                 beam_size=5,
