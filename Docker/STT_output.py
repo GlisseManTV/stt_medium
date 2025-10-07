@@ -16,7 +16,6 @@ from faster_whisper import available_models, download_model
 MODEL_SIZE_ENV = os.getenv("MODEL_SIZE", "medium")
 DEVICE_ENV = os.getenv("DEVICE", "cuda")
 COMPUTE_TYPE_ENV = os.getenv("COMPUTE_TYPE", "float16")
-BATCH_SIZE_ENV = int(os.getenv("BATCH_SIZE", 8))
 OUTPUT_DIR_ENV = os.getenv("OUTPUT_DIR", "/rootPath/STT_Output")
 
 def test_available_models():
@@ -37,7 +36,6 @@ async def transcribe(file: UploadFile = File(...), model_name: str = Form("whisp
         segments_gen, info = model.transcribe(
             filename,
             beam_size=5,
-            batch_size=BATCH_SIZE_ENV
         )
         segments = list(segments_gen)
         text = "".join([segment.text for segment in tqdm(segments, desc="Transcription", unit="segment", file=sys.stdout, ascii=True)])
